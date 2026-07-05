@@ -262,7 +262,7 @@
 
     <header>
         <div class="logo-area">
-            <h1>⚠️ Workshop Safety Hub <span id="admin-badge" style="display:none; color: #60a5fa; font-size: 1rem;">[ADMIN MODE]</span></h1>
+            <h1>⚠️ <span id="hub-title">Workshop Safety Hub</span> <span id="admin-badge" style="display:none; color: #60a5fa; font-size: 1rem;">[ADMIN MODE]</span></h1>
         </div>
         <div class="admin-controls">
             <span id="live-date" style="margin-right: 15px; font-size: 0.9rem;"></span>
@@ -377,6 +377,18 @@
     </main>
 
     <script>
+        // --- URL NAMESPACING SYSTEM ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomName = urlParams.get('room') || 'Default';
+        
+        // Update Title UI based on room parameter
+        document.getElementById('hub-title').innerText = `${roomName} Safety Hub`;
+
+        // Helper function to create uniquely isolated LocalStorage keys per room
+        function getRoomKey(baseKey) {
+            return `${roomName.toLowerCase().replace(/[^a-z0-9]/g, '')}_${baseKey}`;
+        }
+
         // DEFAULT CONFIGURATIONS
         const defaultHazards = [
             { title: "⚡ High Voltage Equipment", desc: "Fixed machinery operates on 3-phase power.", rule: "Never open electrical panels. Report exposed wiring immediately." },
@@ -384,7 +396,6 @@
             { title: "🔥 Hot Works & Chemical Storage", desc: "Welding bays and chemical cabinets.", rule: "Check ventilation systems. Ensure correct fire extinguisher is near." }
         ];
 
-        // VEHICLE WORKSHOP INTEGRATED LIST (Now contains your external SDS link)
         const defaultDocs = [
             { type: "sop", name: "Disc Brake Lathe SOP", url: "SOP Automotive_Disc Brake Lathe.pdf" },
             { type: "sop", name: "Drill Press SOP", url: "SOP Automotive_Drill press.pdf" },
@@ -464,7 +475,7 @@
         // 1. DYNAMIC PERMANENT HAZARDS MANAGER
         function renderPermanentHazards() {
             const container = document.getElementById('permanentHazardsContainer');
-            const data = JSON.parse(localStorage.getItem('permHazards')) || defaultHazards;
+            const data = JSON.parse(localStorage.getItem(getRoomKey('permHazards'))) || defaultHazards;
             container.innerHTML = '';
             
             data.forEach((item, index) => {
@@ -487,24 +498,24 @@
             const rule = prompt("Enter Mandatory Safety Rule (What must students do/wear?):");
 
             if (title && desc && rule) {
-                const data = JSON.parse(localStorage.getItem('permHazards')) || defaultHazards;
+                const data = JSON.parse(localStorage.getItem(getRoomKey('permHazards'))) || defaultHazards;
                 data.push({ title, desc, rule });
-                localStorage.setItem('permHazards', JSON.stringify(data));
+                localStorage.setItem(getRoomKey('permHazards'), JSON.stringify(data));
                 renderPermanentHazards();
             }
         }
 
         function deletePermanentHazardCard(index) {
             if (confirm("Are you sure you want to remove this permanent hazard card?")) {
-                const data = JSON.parse(localStorage.getItem('permHazards')) || defaultHazards;
+                const data = JSON.parse(localStorage.getItem(getRoomKey('permHazards'))) || defaultHazards;
                 data.splice(index, 1);
-                localStorage.setItem('permHazards', JSON.stringify(data));
+                localStorage.setItem(getRoomKey('permHazards'), JSON.stringify(data));
                 renderPermanentHazards();
             }
         }
 
         function savePermanentHazards() {
-            const data = JSON.parse(localStorage.getItem('permHazards')) || defaultHazards;
+            const data = JSON.parse(localStorage.getItem(getRoomKey('permHazards'))) || defaultHazards;
             document.querySelectorAll('#permanentHazardsContainer .card').forEach((card, idx) => {
                 const titleElem = card.querySelector('[data-field="title"]');
                 const descElem = card.querySelector('[data-field="desc"]');
@@ -516,12 +527,12 @@
                     data[idx].rule = ruleElem.innerText;
                 }
             });
-            localStorage.setItem('permHazards', JSON.stringify(data));
-            alert("All Permanent Hazard layouts and text updates saved successfully!");
+            localStorage.setItem(getRoomKey('permHazards'), JSON.stringify(data));
+            alert(`All updates for the ${roomName} environment have been saved successfully!`);
         }
 
         // 2. DAILY STUDENT LOGS
-        let logs = JSON.parse(localStorage.getItem('studentLogs')) || [];
+        let logs = JSON.parse(localStorage.getItem(getRoomKey('studentLogs'))) || [];
         
         function renderHazards() {
             const tbody = document.getElementById('hazardLogBody');
@@ -554,42 +565,41 @@
             };
 
             logs.unshift(newLog);
-            localStorage.setItem('studentLogs', JSON.stringify(logs));
+            localStorage.setItem(getRoomKey('studentLogs'), JSON.stringify(logs));
             renderHazards();
             document.getElementById('hazardForm').reset();
         }
 
         function deleteLog(index) {
             logs.splice(index, 1);
-            localStorage.setItem('studentLogs', JSON.stringify(logs));
+            localStorage.setItem(getRoomKey('studentLogs'), JSON.stringify(logs));
             renderHazards();
         }
 
         function clearAllHazards() {
             if(confirm("Wipe today's log completely?")) {
                 logs = [];
-                localStorage.setItem('studentLogs', JSON.stringify(logs));
+                localStorage.setItem(getRoomKey('studentLogs'), JSON.stringify(logs));
                 renderHazards();
             }
         }
 
-        // 3. DOCUMENTS (SOP/SDS) - ROUTING MECHANISM FIXED HERE
+        // 3. DOCUMENTS (SOP/SDS)
         function renderDocs() {
             const sopList = document.getElementById('sopList');
             const sdsList = document.getElementById('sdsList');
             
-            let docData = JSON.parse(localStorage.getItem('shopDocs'));
+            let docData = JSON.parse(localStorage.getItem(getRoomKey('shopDocs')));
             
             if (!docData || docData.length === 0) {
                 docData = defaultDocs;
-                localStorage.setItem('shopDocs', JSON.stringify(defaultDocs));
+                localStorage.setItem(getRoomKey('shopDocs'), JSON.stringify(defaultDocs));
             }
             
             sopList.innerHTML = '';
             sdsList.innerHTML = '';
 
             docData.forEach((doc, index) => {
-                // FIX: Check if the link is a web address or a local repository file
                 const isExternal = doc.url.startsWith('http://') || doc.url.startsWith('https://');
                 const targetUrl = isExternal ? doc.url : encodeURIComponent(doc.url);
 
@@ -608,7 +618,7 @@
 
         function resetToDefaults() {
             if(confirm("Force reload list to default hardcoded files? This clears your custom browser layout storage for the SOP section.")) {
-                localStorage.removeItem('shopDocs');
+                localStorage.removeItem(getRoomKey('shopDocs'));
                 renderDocs();
             }
         }
@@ -620,24 +630,24 @@
             const url = prompt("Enter Document File Link:");
             
             if(name && url) {
-                const docData = JSON.parse(localStorage.getItem('shopDocs')) || defaultDocs;
+                const docData = JSON.parse(localStorage.getItem(getRoomKey('shopDocs'))) || defaultDocs;
                 docData.push({type, name, url});
-                localStorage.setItem('shopDocs', JSON.stringify(docData));
+                localStorage.setItem(getRoomKey('shopDocs'), JSON.stringify(docData));
                 renderDocs();
             }
         }
 
         function deleteDoc(index) {
-            const docData = JSON.parse(localStorage.getItem('shopDocs')) || defaultDocs;
+            const docData = JSON.parse(localStorage.getItem(getRoomKey('shopDocs'))) || defaultDocs;
             docData.splice(index, 1);
-            localStorage.setItem('shopDocs', JSON.stringify(docData));
+            localStorage.setItem(getRoomKey('shopDocs'), JSON.stringify(docData));
             renderDocs();
         }
 
         // 4. VIDEO GALLERY
         function renderVideos() {
             const container = document.getElementById('videoContainer');
-            const vidData = JSON.parse(localStorage.getItem('shopVideos')) || defaultVideos;
+            const vidData = JSON.parse(localStorage.getItem(getRoomKey('shopVideos'))) || defaultVideos;
             container.innerHTML = '';
 
             vidData.forEach((vid, index) => {
@@ -661,17 +671,17 @@
             const desc = prompt("Enter short description:");
 
             if(title && src) {
-                const vidData = JSON.parse(localStorage.getItem('shopVideos')) || defaultVideos;
+                const vidData = JSON.parse(localStorage.getItem(getRoomKey('shopVideos'))) || defaultVideos;
                 vidData.push({title, src, desc});
-                localStorage.setItem('shopVideos', JSON.stringify(vidData));
+                localStorage.setItem(getRoomKey('shopVideos'), JSON.stringify(vidData));
                 renderVideos();
             }
         }
 
         function deleteVideo(index) {
-            const vidData = JSON.parse(localStorage.getItem('shopVideos')) || defaultVideos;
+            const vidData = JSON.parse(localStorage.getItem(getRoomKey('shopVideos'))) || defaultVideos;
             vidData.splice(index, 1);
-            localStorage.setItem('shopVideos', JSON.stringify(vidData));
+            localStorage.setItem(getRoomKey('shopVideos'), JSON.stringify(vidData));
             renderVideos();
         }
 

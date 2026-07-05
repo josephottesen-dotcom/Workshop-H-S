@@ -350,7 +350,10 @@
         <section id="docs" class="tab-content">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <h2>Standard Operating Procedures (SOP) & Safety Data Sheets (SDS)</h2>
-                <button class="btn-submit admin-only" onclick="addNewDoc()" style="background: var(--admin-color); padding: 0.5rem 1rem;">➕ Add New Document</button>
+                <div class="admin-only" style="display: flex; gap: 10px;">
+                    <button class="btn-submit" onclick="resetToDefaults()" style="background: var(--danger); padding: 0.5rem 1rem;">🔄 Force Reload SOP List</button>
+                    <button class="btn-submit" onclick="addNewDoc()" style="background: var(--admin-color); padding: 0.5rem 1rem;">➕ Add New Document</button>
+                </div>
             </div>
             <div class="grid-3">
                 <div class="card">
@@ -381,7 +384,7 @@
             { title: "🔥 Hot Works & Chemical Storage", desc: "Welding bays and chemical cabinets.", rule: "Check ventilation systems. Ensure correct fire extinguisher is near." }
         ];
 
-        // FULL INTEGRATED AUTOMOTIVE SOP/SDS LIST
+        // VEHICLE WORKSHOP INTEGRATED LIST
         const defaultDocs = [
             { type: "sop", name: "Disc Brake Lathe SOP", url: "SOP Automotive_Disc Brake Lathe.pdf" },
             { type: "sop", name: "Drill Press SOP", url: "SOP Automotive_Drill press.pdf" },
@@ -569,11 +572,18 @@
             }
         }
 
-        // 3. DOCUMENTS (SOP/SDS)
+        // 3. DOCUMENTS (SOP/SDS) - UPDATED CACHE-BYPASS CHECK
         function renderDocs() {
             const sopList = document.getElementById('sopList');
             const sdsList = document.getElementById('sdsList');
-            const docData = JSON.parse(localStorage.getItem('shopDocs')) || defaultDocs;
+            
+            let docData = JSON.parse(localStorage.getItem('shopDocs'));
+            
+            // If local storage is empty OR contains an empty list, bypass it and load our hardcoded 22 files!
+            if (!docData || docData.length === 0) {
+                docData = defaultDocs;
+                localStorage.setItem('shopDocs', JSON.stringify(defaultDocs));
+            }
             
             sopList.innerHTML = '';
             sdsList.innerHTML = '';
@@ -590,6 +600,13 @@
                 if(doc.type === 'sop') sopList.appendChild(li);
                 else sdsList.appendChild(li);
             });
+        }
+
+        function resetToDefaults() {
+            if(confirm("Force reload list to default hardcoded files? This clears your custom browser layout storage for the SOP section.")) {
+                localStorage.removeItem('shopDocs');
+                renderDocs();
+            }
         }
 
         function addNewDoc() {
@@ -658,5 +675,4 @@
         refreshAllViews();
     </script>
 </body>
-</html>
 </html>

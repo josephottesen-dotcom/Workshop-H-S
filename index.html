@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workshop Safety Hub & Toolbox Meeting</title>
+    <style>
+        :root {
+            --primary: #d97706;
+            --primary-dark: #b45309;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --admin-color: #2563eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--dark);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 5px solid var(--primary);
+        }
+
+        .logo-area h1 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-admin {
+            background: #374151;
+            color: white;
+            border: 1px solid #4b5563;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-admin.logged-in {
+            background: var(--admin-color);
+            border-color: #1d4ed8;
+        }
+
+        nav {
+            background: white;
+            display: flex;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #4b5563;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            background-color: #f9fafb;
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        h2 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+            border-left: 5px solid var(--primary);
+            padding-left: 10px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .hazard-card {
+            border-top: 4px solid var(--danger);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        label {
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        button.btn-submit {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button.btn-submit:hover {
+            background-color: var(--primary-dark);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background-color: #f9fafb;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        .badge.high { background: #fee2e2; color: #b91c1c; }
+        .badge.med { background: #fef3c7; color: #b45309; }
+        .badge.low { background: #dcfce7; color: #15803d; }
+
+        .doc-list {
+            list-style: none;
+        }
+        .doc-list li {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .doc-link {
+            color: var(--primary-dark);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            background: #000;
+        }
+        .video-container iframe, .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Admin UI elements */
+        .admin-only {
+            display: none !important;
+        }
+        
+        body.admin-mode .admin-only {
+            display: inline-block !important;
+        }
+
+        .btn-delete {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .editable-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--admin-color);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <h1>⚠️ Workshop Safety Hub <span id="admin-badge" style="display:none; color: #60a5fa; font-size: 1rem;">[ADMIN MODE]</span></h1>
+        </div>
+        <div class="admin-controls">
+            <span id="live-date" style="margin-right: 15px; font-size: 0.9rem;"></span>
+            <button id="adminBtn" class="btn-admin" onclick="toggleAdmin()">Admin Login</button>
+        </div>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" onclick="switchTab('rules')">Permanent Hazards & Rules</button>
+        <button class="nav-btn" onclick="switchTab('toolbox')">Daily Toolbox Meeting</button>
+        <button class="nav-btn" onclick="switchTab('docs')">SOPs & SDS Docs</button>
+        <button class="nav-btn" onclick="switchTab('videos')">Safety Videos</button>
+    </nav>
+
+    <main>
+        <section id="rules" class="tab-content active">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <h2>Permanent Workshop Hazards & Rules</h2>
+                    <p style="color: #6b7280;">These rules are always present. Admins can add cards, or click text blocks directly to modify them.</p>
+                </div>
+                <div class="admin-only" style="display: flex; gap: 10px;">
+                    <button class="btn-submit" onclick="addPermanentHazardCard()" style="background: #16a34a; padding: 0.5rem 1rem;">➕ Add New Card</button>
+                    <button class="btn-submit" onclick="savePermanentHazards()" style="background: var(--admin-color); padding: 0.5rem 1rem;">💾 Save Card Edits</button>
+                </div>
+            </div>
+            
+            <div class="grid-3" id="permanentHazardsContainer">
+                </div>
+        </section>
+
+        <section id="toolbox" class="tab-content">
+            <div class="grid-3" style="grid-template-columns: 1fr 2fr;">
+                <div class="card">
+                    <h2>Daily Hazard Identification</h2>
+                    <form id="hazardForm" onsubmit="submitHazard(event)">
+                        <div>
+                            <label for="studentName">Student Name / Group</label>
+                            <input type="text" id="studentName" required placeholder="e.g. John Doe / Team A">
+                        </div>
+                        <div>
+                            <label for="hazardLocation">Location/Machine</label>
+                            <input type="text" id="hazardLocation" required placeholder="e.g. Bench 4, Welding Bay 2">
+                        </div>
+                        <div>
+                            <label for="hazardDesc">Observed Hazard / Issue</label>
+                            <textarea id="hazardDesc" rows="3" required placeholder="Describe what you found..."></textarea>
+                        </div>
+                        <div>
+                            <label for="riskLevel">Risk Level</label>
+                            <select id="riskLevel">
+                                <option value="Low">Low (Action required later)</option>
+                                <option value="Medium">Medium (Fix before use)</option>
+                                <option value="High">High (STOP WORK / Report to Tech)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-submit">Log Hazard & Complete Sign-off</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2>Today's Live Hazard Register</h2>
+                        <button class="btn-delete admin-only" onclick="clearAllHazards()">Clear Entire Register</button>
+                    </div>
+                    <p style="color: #6b7280; font-size: 0.9rem;">Items logged by students today.</p>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Logged By</th>
+                                    <th>Location</th>
+                                    <th>Hazard Description</th>
+                                    <th>Risk</th>
+                                    <th class="admin-only">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hazardLogBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="docs" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2>Standard Operating Procedures (SOP) & Safety Data Sheets (SDS)</h2>
+                <button class="btn-submit admin-only" onclick="addNewDoc()" style="background: var(--admin-color); padding: 0.5rem 1rem;">➕ Add New Document</button>
+            </div>
+            <div class="grid-3">
+                <div class="card">
+                    <h3>Standard Operating Procedures</h3>
+                    <ul class="doc-list" id="sopList"></ul>
+                </div>
+                <div class="card">
+                    <h3>Safety Data Sheets (SDS)</h3>
+                    <ul class="doc-list" id="sdsList"></ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="videos" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2>Workshop Training Videos</h2>
+                <button class="btn-submit admin-only" onclick="addNewVideo()" style="background: var(--admin-color); padding: 0.5rem 1rem;">➕ Add Video</button>
+            </div>
+            <div class="grid-3" id="videoContainer"></div>
+        </section>
+    </main>
+
+    <script>
+        // DEFAULT CONFIGURATIONS
+        const defaultHazards = [
+            { title: "⚡ High Voltage Equipment", desc: "Fixed machinery operates on 3-phase power.", rule: "Never open electrical panels. Report exposed wiring immediately." },
+            { title: "⚙️ Rotating Machinery", desc: "Lathes, CNC machines, and drill presses.", rule: "Tie back long hair, no loose clothing, and mandatory safety glasses." },
+            { title: "🔥 Hot Works & Chemical Storage", desc: "Welding bays and chemical cabinets.", rule: "Check ventilation systems. Ensure correct fire extinguisher is near." }
+        ];
+
+        const defaultDocs = [
+            { type: "sop", name: "Milling Machine SOP", url: "#" },
+            { type: "sds", name: "Acetone Chemical Safety", url: "#" }
+        ];
+
+        const defaultVideos = [
+            { title: "How-To: Safe Setup of the Bench Drill", src: "https://www.youtube.com/embed/dQw4w9WgXcQ", desc: "Duration: 4 mins. Covers clamp usage." }
+        ];
+
+        let isAdmin = false;
+
+        // Tab Management
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Live Date
+        document.getElementById('live-date').innerText = new Date().toLocaleDateString('en-US', {
+            weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+        });
+
+        // Admin Toggle
+        function toggleAdmin() {
+            if (!isAdmin) {
+                let password = prompt("Enter Workshop Administrator Password:");
+                if (password === "admin123") {
+                    isAdmin = true;
+                    document.body.classList.add('admin-mode');
+                    document.getElementById('adminBtn').innerText = "Logout Admin";
+                    document.getElementById('adminBtn').classList.add('logged-in');
+                    document.getElementById('admin-badge').style.display = "inline";
+                    refreshAllViews();
+                } else {
+                    alert("Incorrect access key.");
+                }
+            } else {
+                isAdmin = false;
+                document.body.classList.remove('admin-mode');
+                document.getElementById('adminBtn').innerText = "Admin Login";
+                document.getElementById('adminBtn').classList.remove('logged-in');
+                document.getElementById('admin-badge').style.display = "none";
+                refreshAllViews();
+            }
+        }
+
+        function refreshAllViews() {
+            renderPermanentHazards();
+            renderDocs();
+            renderVideos();
+            renderHazards();
+        }
+
+        // 1. DYNAMIC PERMANENT HAZARDS MANAGER
+        function renderPermanentHazards() {
+            const container = document.getElementById('permanentHazardsContainer');
+            const data = JSON.parse(localStorage.getItem('permHazards')) || defaultHazards;
+            container.innerHTML = '';
+            
+            data.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "card hazard-card";
+                card.innerHTML = `
+                    ${isAdmin ? '<span class="editable-indicator">Editable Card</span>' : ''}
+                    <h3 ${isAdmin ? 'contenteditable="true"' : ''} data-field="title" data-index="${index}">${item.title}</h3>
+                    <p style="margin: 0.5rem 0;" ${isAdmin ? 'contenteditable="true"' : ''} data-field="desc" data-index="${index}">${item.desc}</p>
+                    <strong>Rule:</strong> <span ${isAdmin ? 'contenteditable="true"' : ''} data-field="rule" data-index="${index}">${item.rule}</span>
+                    ${isAdmin ? `<button class="btn-delete" style="margin-top: 15px; width: 100%;" onclick="deletePermanentHazardCard(${index})">Delete This Card</button>` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function addPermanentHazardCard() {
+            const title = prompt("Enter Hazard Category / Title (e.g., 🪚 Table Saw Hazards):");
+            const desc = prompt("Enter Hazard Description (What is dangerous?):");
+            const rule = prompt("Enter Mandatory Safety Rule (What must students do/wear?):");
+
+            if (title && desc && rule) {
+                const data = JSON.parse(localStorage.getItem('permHazards')) || defaultHazards;
+                data.push({ title, desc, rule });
+                localStorage.setItem('permHazards', JSON.stringify(data));
+                renderPermanentHazards();
+            }
+        }
+
+        function deletePermanentHazardCard(index) {
+            if (confirm("Are you sure you want to remove this permanent hazard card?")) {
+                const data = JSON.parse(localStorage.getItem('permHazards')) || defaultHazards;
+                data.splice(index, 1);
+                localStorage.setItem('permHazards', JSON.stringify(data));
+                renderPermanentHazards();
+            }
+        }
+
+        function savePermanentHazards() {
+            const data = JSON.parse(localStorage.getItem('permHazards')) || defaultHazards;
+            document.querySelectorAll('#permanentHazardsContainer .card').forEach((card, idx) => {
+                const titleElem = card.querySelector('[data-field="title"]');
+                const descElem = card.querySelector('[data-field="desc"]');
+                const ruleElem = card.querySelector('[data-field="rule"]');
+                
+                if (titleElem && descElem && ruleElem) {
+                    data[idx].title = titleElem.innerText;
+                    data[idx].desc = descElem.innerText;
+                    data[idx].rule = ruleElem.innerText;
+                }
+            });
+            localStorage.setItem('permHazards', JSON.stringify(data));
+            alert("All Permanent Hazard layouts and text updates saved successfully!");
+        }
+
+        // 2. DAILY STUDENT LOGS
+        let logs = JSON.parse(localStorage.getItem('studentLogs')) || [];
+        
+        function renderHazards() {
+            const tbody = document.getElementById('hazardLogBody');
+            tbody.innerHTML = '';
+            logs.forEach((h, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${h.time}</td>
+                    <td><strong>${h.user}</strong></td>
+                    <td>${h.loc}</td>
+                    <td>${h.desc}</td>
+                    <td><span class="badge ${h.risk.toLowerCase()}">${h.risk}</span></td>
+                    <td class="admin-only"><button class="btn-delete" onclick="deleteLog(${index})">❌</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function submitHazard(e) {
+            e.preventDefault();
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            const newLog = {
+                time: timeStr,
+                user: document.getElementById('studentName').value,
+                loc: document.getElementById('hazardLocation').value,
+                desc: document.getElementById('hazardDesc').value,
+                risk: document.getElementById('riskLevel').value
+            };
+
+            logs.unshift(newLog);
+            localStorage.setItem('studentLogs', JSON.stringify(logs));
+            renderHazards();
+            document.getElementById('hazardForm').reset();
+        }
+
+        function deleteLog(index) {
+            logs.splice(index, 1);
+            localStorage.setItem('studentLogs', JSON.stringify(logs));
+            renderHazards();
+        }
+
+        function clearAllHazards() {
+            if(confirm("Wipe today's log completely?")) {
+                logs = [];
+                localStorage.setItem('studentLogs', JSON.stringify(logs));
+                renderHazards();
+            }
+        }
+
+        // 3. DOCUMENTS (SOP/SDS)
+        function renderDocs() {
+            const sopList = document.getElementById('sopList');
+            const sdsList = document.getElementById('sdsList');
+            const docData = JSON.parse(localStorage.getItem('shopDocs')) || defaultDocs;
+            
+            sopList.innerHTML = '';
+            sdsList.innerHTML = '';
+
+            docData.forEach((doc, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${doc.name}</span>
+                    <div>
+                        <a href="${doc.url}" target="_blank" class="doc-link">📄 View File</a>
+                        <button class="btn-delete admin-only" style="margin-left:10px;" onclick="deleteDoc(${index})">❌</button>
+                    </div>
+                `;
+                if(doc.type === 'sop') sopList.appendChild(li);
+                else sdsList.appendChild(li);
+            });
+        }
+
+        function addNewDoc() {
+            const type = prompt("Enter type ('sop' or 'sds'):").toLowerCase();
+            if(type !== 'sop' && type !== 'sds') return alert("Invalid Type.");
+            const name = prompt("Enter Document Name:");
+            const url = prompt("Enter Document File Link:");
+            
+            if(name && url) {
+                const docData = JSON.parse(localStorage.getItem('shopDocs')) || defaultDocs;
+                docData.push({type, name, url});
+                localStorage.setItem('shopDocs', JSON.stringify(docData));
+                renderDocs();
+            }
+        }
+
+        function deleteDoc(index) {
+            const docData = JSON.parse(localStorage.getItem('shopDocs')) || defaultDocs;
+            docData.splice(index, 1);
+            localStorage.setItem('shopDocs', JSON.stringify(docData));
+            renderDocs();
+        }
+
+        // 4. VIDEO GALLERY
+        function renderVideos() {
+            const container = document.getElementById('videoContainer');
+            const vidData = JSON.parse(localStorage.getItem('shopVideos')) || defaultVideos;
+            container.innerHTML = '';
+
+            vidData.forEach((vid, index) => {
+                const card = document.createElement('div');
+                card.className = "card";
+                card.innerHTML = `
+                    <div class="video-container">
+                        <iframe src="${vid.src}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <h3>${vid.title}</h3>
+                    <p style="color: #6b7280; font-size: 0.9rem;">${vid.desc}</p>
+                    <button class="btn-delete admin-only" style="margin-top:10px; width:100%;" onclick="deleteVideo(${index})">Remove Video</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function addNewVideo() {
+            const title = prompt("Enter Video Title:");
+            const src = prompt("Enter Embed link (use https://www.youtube.com/embed/ID):");
+            const desc = prompt("Enter short description:");
+
+            if(title && src) {
+                const vidData = JSON.parse(localStorage.getItem('shopVideos')) || defaultVideos;
+                vidData.push({title, src, desc});
+                localStorage.setItem('shopVideos', JSON.stringify(vidData));
+                renderVideos();
+            }
+        }
+
+        function deleteVideo(index) {
+            const vidData = JSON.parse(localStorage.getItem('shopVideos')) || defaultVideos;
+            vidData.splice(index, 1);
+            localStorage.setItem('shopVideos', JSON.stringify(vidData));
+            renderVideos();
+        }
+
+        // INITIAL PAGE RUN
+        refreshAllViews();
+    </script>
+</body>
+</html>

@@ -377,19 +377,28 @@
     </main>
 
     <script>
-        // --- URL NAMESPACING SYSTEM ---
+        // --- BULLETPROOF URL NAMESPACE SYSTEM ---
         const urlParams = new URLSearchParams(window.location.search);
-        const roomName = urlParams.get('room') || 'Default';
-        
-        // Update Title UI based on room parameter
-        document.getElementById('hub-title').innerText = `${roomName} Safety Hub`;
+        let rawRoomName = urlParams.get('room');
 
-        // Helper function to create uniquely isolated LocalStorage keys per room
-        function getRoomKey(baseKey) {
-            return `${roomName.toLowerCase().replace(/[^a-z0-9]/g, '')}_${baseKey}`;
+        // Force fallback to 'Automotive' if parameter is completely empty or missing
+        if (!rawRoomName || rawRoomName.trim() === "") {
+            rawRoomName = 'Automotive';
         }
 
-        // DEFAULT CONFIGURATIONS
+        // Standardize Capitalization for clean user display (e.g., carpentry -> Carpentry)
+        const roomName = rawRoomName.charAt(0).toUpperCase() + rawRoomName.slice(1).toLowerCase();
+
+        // Dynamically update the visual Title
+        document.getElementById('hub-title').innerText = `${roomName} Safety Hub`;
+
+        // Safely strip spaces and characters to generate bulletproof LocalStorage keys
+        function getRoomKey(baseKey) {
+            const safeRoomId = roomName.toLowerCase().replace(/[^a-z0-9]/g, '');
+            return `${safeRoomId}_${baseKey}`;
+        }
+
+        // DEFAULT HARDCODED SIMULATION LAYOUT DATA
         const defaultHazards = [
             { title: "⚡ High Voltage Equipment", desc: "Fixed machinery operates on 3-phase power.", rule: "Never open electrical panels. Report exposed wiring immediately." },
             { title: "⚙️ Rotating Machinery", desc: "Lathes, CNC machines, and drill presses.", rule: "Tie back long hair, no loose clothing, and mandatory safety glasses." },
@@ -436,12 +445,12 @@
             event.currentTarget.classList.add('active');
         }
 
-        // Live Date
+        // Live Date Configuration
         document.getElementById('live-date').innerText = new Date().toLocaleDateString('en-US', {
             weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
         });
 
-        // Admin Toggle
+        // Admin Toggle Mechanisms
         function toggleAdmin() {
             if (!isAdmin) {
                 let password = prompt("Enter Workshop Administrator Password:");
@@ -685,7 +694,7 @@
             renderVideos();
         }
 
-        // INITIAL PAGE RUN
+        // INITIAL DATA REFRESH ON SITE LOAD
         refreshAllViews();
     </script>
 </body>

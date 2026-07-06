@@ -150,207 +150,232 @@
     </main>
 
     <script>
-        // --- SECURE TUTOR LOGIC & SYSTEM NAMESPACE ---
-        // Joseph is now explicitly configured as the default baseline workspace profile
-        let currentTutor = localStorage.getItem('active_tutor') || 'Joseph';
-        let isAdmin = localStorage.getItem('is_tutor_authenticated') === 'true';
+    // --- SECURE TUTOR LOGIC & SYSTEM NAMESPACE ---
+    let currentTutor = localStorage.getItem('active_tutor') || 'Joseph';
+    let isAdmin = localStorage.getItem('is_tutor_authenticated') === 'true';
 
-        function updateRoomUI() {
-            const formattedName = currentTutor.charAt(0).toUpperCase() + currentTutor.slice(1).toLowerCase();
-            document.getElementById('hub-title').innerText = `${formattedName}'s Safety Hub`;
-            document.querySelectorAll('.current-tutor-name').forEach(el => el.innerText = formattedName);
-            
-            if (isAdmin) {
-                document.body.classList.add('admin-mode');
-                document.getElementById('adminBtn').innerText = `Logout (${formattedName})`;
-                document.getElementById('adminBtn').classList.add('logged-in');
-                document.getElementById('admin-badge').style.display = "inline";
-            } else {
-                document.body.classList.remove('admin-mode');
-                document.getElementById('adminBtn').innerText = "Tutor Login";
-                document.getElementById('adminBtn').classList.remove('logged-in');
-                document.getElementById('admin-badge').style.display = "none";
-            }
-            renderAllViews();
+    function updateRoomUI() {
+        const formattedName = currentTutor.charAt(0).toUpperCase() + currentTutor.slice(1).toLowerCase();
+        document.getElementById('hub-title').innerText = `${formattedName}'s Safety Hub`;
+        document.querySelectorAll('.current-tutor-name').forEach(el => el.innerText = formattedName);
+        
+        if (isAdmin) {
+            document.body.classList.add('admin-mode');
+            document.getElementById('adminBtn').innerText = `Logout (${formattedName})`;
+            document.getElementById('adminBtn').classList.add('logged-in');
+            document.getElementById('admin-badge').style.display = "inline";
+        } else {
+            document.body.classList.remove('admin-mode');
+            document.getElementById('adminBtn').innerText = "Tutor Login";
+            document.getElementById('adminBtn').classList.remove('logged-in');
+            document.getElementById('admin-badge').style.display = "none";
         }
+        renderAllViews();
+    }
 
-        function getRoomKey(baseKey) {
-            return `${currentTutor.toLowerCase()}_${baseKey}`;
+    function getRoomKey(baseKey) {
+        return `${currentTutor.toLowerCase()}_${baseKey}`;
+    }
+
+    // --- AUTHENTICATION & LOGIN CHECKS ---
+    function openLoginModal() {
+        if (isAdmin) {
+            isAdmin = false;
+            localStorage.setItem('is_tutor_authenticated', 'false');
+            updateRoomUI();
+            return;
         }
-
-        // --- AUTHENTICATION & LOGIN CHECKS ---
-        function openLoginModal() {
-            if (isAdmin) {
-                isAdmin = false;
-                localStorage.setItem('is_tutor_authenticated', 'false');
+        
+        const tutorInput = prompt("Enter Tutor Name (Joseph, Ronnel, Mike, Lucky, Nigel):");
+        if (!tutorInput || tutorInput.trim() === "") return;
+        
+        const standardizedInput = tutorInput.trim().toLowerCase();
+        
+        if (standardizedInput === 'joseph' || standardizedInput === 'ronnel' || standardizedInput === 'mike' || standardizedInput === 'lucky' || standardizedInput === 'nigel') {
+            const passInput = prompt(`Enter security password for ${tutorInput.trim()}:`);
+            if (passInput === "admin123") {
+                currentTutor = standardizedInput;
+                isAdmin = true;
+                localStorage.setItem('active_tutor', currentTutor);
+                localStorage.setItem('is_tutor_authenticated', 'true');
                 updateRoomUI();
-                return;
-            }
-            
-            const tutorInput = prompt("Enter Tutor Name (Joseph, Ronnel, Mike, Lucky, Nigel):");
-            if (!tutorInput || tutorInput.trim() === "") return;
-            
-            const standardizedInput = tutorInput.trim().toLowerCase();
-            
-            // Added joseph down into the core access verification conditional
-            if (standardizedInput === 'joseph' || standardizedInput === 'ronnel' || standardizedInput === 'mike' || standardizedInput === 'lucky' || standardizedInput === 'nigel') {
-                const passInput = prompt(`Enter security password for ${tutorInput.trim()}:`);
-                if (passInput === "admin123") {
-                    currentTutor = standardizedInput;
-                    isAdmin = true;
-                    localStorage.setItem('active_tutor', currentTutor);
-                    localStorage.setItem('is_tutor_authenticated', 'true');
-                    updateRoomUI();
-                } else {
-                    alert("Incorrect system security password.");
-                }
             } else {
-                alert("Tutor name not recognized in configuration profile list.");
+                alert("Incorrect system security password.");
             }
+        } else {
+            alert("Tutor name not recognized in configuration profile list.");
         }
+    }
 
-        // --- GOOGLE INTEGRATIONS HANDLER ---
-        function saveGoogleUrls() {
-            const formUrl = document.getElementById('adminFormUrl').value.trim();
-            const sheetUrl = document.getElementById('adminSheetUrl').value.trim();
-            
-            if(formUrl) localStorage.setItem(getRoomKey('googleForm'), formUrl);
-            if(sheetUrl) localStorage.setItem(getRoomKey('googleSheet'), sheetUrl);
-            
-            alert("Tutor cloud widgets linked successfully!");
-            renderGoogleIframes();
+    // --- GOOGLE INTEGRATIONS HANDLER ---
+    function saveGoogleUrls() {
+        const formUrl = document.getElementById('adminFormUrl').value.trim();
+        const sheetUrl = document.getElementById('adminSheetUrl').value.trim();
+        
+        if(formUrl) localStorage.setItem(getRoomKey('googleForm'), formUrl);
+        if(sheetUrl) localStorage.setItem(getRoomKey('googleSheet'), sheetUrl);
+        
+        alert("Tutor cloud widgets linked successfully!");
+        renderGoogleIframes();
+    }
+
+    function renderGoogleIframes() {
+        const savedForm = localStorage.getItem(getRoomKey('googleForm'));
+        const savedSheet = localStorage.getItem(getRoomKey('googleSheet'));
+        
+        if (savedForm) {
+            document.getElementById('formContainer').innerHTML = `<iframe src="${savedForm}">Loading Form...</iframe>`;
+            document.getElementById('adminFormUrl').value = savedForm;
+        } else {
+            document.getElementById('formContainer').innerHTML = `<p style="padding:20px; color:#6b7280;">No custom Google Form linked yet. Log in to your tutor account to link it.</p>`;
         }
-
-        function renderGoogleIframes() {
-            const savedForm = localStorage.getItem(getRoomKey('googleForm'));
-            const savedSheet = localStorage.getItem(getRoomKey('googleSheet'));
-            
-            if (savedForm) {
-                document.getElementById('formContainer').innerHTML = `<iframe src="${savedForm}">Loading Form...</iframe>`;
-                document.getElementById('adminFormUrl').value = savedForm;
-            } else {
-                document.getElementById('formContainer').innerHTML = `<p style="padding:20px; color:#6b7280;">No custom Google Form linked yet. Log in to your tutor account to link it.</p>`;
-            }
-            
-            if (savedSheet) {
-                document.getElementById('sheetContainer').innerHTML = `<iframe src="${savedSheet}">Loading Live Matrix...</iframe>`;
-                document.getElementById('adminSheetUrl').value = savedSheet;
-            } else {
-                document.getElementById('sheetContainer').innerHTML = `<p style="padding:20px; color:#6b7280;">No target tracker spreadsheet connected yet.</p>`;
-            }
+        
+        if (savedSheet) {
+            document.getElementById('sheetContainer').innerHTML = `<iframe src="${savedSheet}">Loading Live Matrix...</iframe>`;
+            document.getElementById('adminSheetUrl').value = savedSheet;
+        } else {
+            document.getElementById('sheetContainer').innerHTML = `<p style="padding:20px; color:#6b7280;">No target tracker spreadsheet connected yet.</p>`;
         }
+    }
 
-        // --- INITIAL LAYOUT CONFIGS ---
-        const defaultHazards = [
-            { title: "⚠️ Custom Hazards Pending", desc: "This workspace configuration is currently blank.", rule: "Please log in as a Tutor to add permanent cards or delete placeholders." }
-        ];
+    // --- INITIAL HARDCODED CONFIGS ---
+    const defaultHazards = [
+        { title: "⚠️ Custom Hazards Pending", desc: "This workspace configuration is currently blank.", rule: "Please log in as a Tutor to add permanent cards or delete placeholders." }
+    ];
 
-        // --- RE-RENDERING CORE LAYOUT SYSTEMS ---
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
+    // HARDCODED CORE MASTER LIST FOR ALL TUTORS
+    const defaultDocs = [
+        { type: "sop", name: "Disc Brake Lathe SOP", url: "SOP Automotive_Disc Brake Lathe.pdf" },
+        { type: "sop", name: "Drill Press SOP", url: "SOP Automotive_Drill press.pdf" },
+        { type: "sop", name: "Jigsaw SOP", url: "SOP Automotive_JigSaw.pdf" },
+        { type: "sop", name: "Launch Hoist (Two Post) SOP", url: "SOP Automotive_Launch Hoist - two post.pdf" },
+        { type: "sop", name: "Parts Wash SOP", url: "SOP Automotive_Parts Wash.pdf" },
+        { type: "sop", name: "Tecalemit Hoist (Two Post) SOP", url: "SOP Automotive_Tecalemit hoist - two post.pdf" },
+        { type: "sop", name: "Wheel Balancer SOP", url: "SOP Automotive_Wheel Balancer.pdf" },
+        { type: "sop", name: "Stationary Engines SOP", url: "SOP Stationary Engines.pdf" },
+        { type: "sop", name: "Vehicles SOP", url: "SOP Vehicles.pdf" },
+        { type: "sop", name: "Angle Grinder SOP", url: "SOP Automotive_Angle Grinder.pdf" },
+        { type: "sop", name: "Battery Charger SOP", url: "SOP Automotive_Battery Charger.pdf" },
+        { type: "sop", name: "Hand Drill SOP", url: "SOP Automotive_Hand Drill.pdf" },
+        { type: "sop", name: "Heshbon Hoist (Two Post) SOP", url: "SOP Automotive_Heshbon Hoist - two post.pdf" },
+        { type: "sop", name: "Hot Water Cleaner SOP", url: "SOP Automotive_Hot Water Cleaner.pdf" },
+        { type: "sop", name: "Istobal Hoist (Four Post) SOP", url: "SOP Automotive_Istobal Hoist - four post.pdf" },
+        { type: "sop", name: "MIG Welder SOP", url: "SOP Automotive_MIG Welder.pdf" },
+        { type: "sop", name: "Oxy-Acetylene Welder SOP", url: "SOP Automotive_Oxy-Acetylene welder.pdf" },
+        { type: "sop", name: "Roller Brake Tester SOP", url: "SOP Automotive_Roller brake tester.pdf" },
+        { type: "sop", name: "Tyre Changer SOP", url: "SOP Automotive_Tyre Changer.pdf" },
+        { type: "sop", name: "Alternating Test Bench SOP", url: "SOP Automotive_Alternating Test Bench.pdf" },
+        { type: "sop", name: "Bench Grinder SOP", url: "SOP Automotive_Bench Grinder.pdf" },
+        { type: "sop", name: "Compressed Air SOP", url: "SOP Automotive_Compressed air.pdf" },
+        { type: "sds", name: "CRC NZ Brakleen SDS", url: "https://www.crc.co.nz/media/sds/crc_nz/sds-1010491.pdf" }
+    ];
 
-        function renderPermanentHazards() {
-            const container = document.getElementById('permanentHazardsContainer');
+    // --- RE-RENDERING CORE LAYOUT SYSTEMS ---
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    function renderPermanentHazards() {
+        const container = document.getElementById('permanentHazardsContainer');
+        const data = JSON.parse(localStorage.getItem(getRoomKey('permHazards'))) || defaultHazards;
+        container.innerHTML = '';
+        
+        data.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = "card hazard-card";
+            card.innerHTML = `
+                <h3 ${isAdmin ? 'contenteditable="true"' : ''} data-field="title">${item.title}</h3>
+                <p style="margin: 0.5rem 0;" ${isAdmin ? 'contenteditable="true"' : ''} data-field="desc">${item.desc}</p>
+                <strong>Rule:</strong> <span ${isAdmin ? 'contenteditable="true"' : ''} data-field="rule">${item.rule}</span>
+                ${isAdmin ? `<button class="btn-admin" style="background:var(--danger); margin-top:15px; width:100%; border:none;" onclick="deletePermanentHazardCard(${index})">Delete Card</button>` : ''}
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function addPermanentHazardCard() {
+        const title = prompt("Enter Hazard Title:");
+        const desc = prompt("Enter Description:");
+        const rule = prompt("Enter Safety Rule:");
+        if (title && desc && rule) {
             const data = JSON.parse(localStorage.getItem(getRoomKey('permHazards'))) || defaultHazards;
-            container.innerHTML = '';
-            
-            data.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = "card hazard-card";
-                card.innerHTML = `
-                    <h3 ${isAdmin ? 'contenteditable="true"' : ''} data-field="title">${item.title}</h3>
-                    <p style="margin: 0.5rem 0;" ${isAdmin ? 'contenteditable="true"' : ''} data-field="desc">${item.desc}</p>
-                    <strong>Rule:</strong> <span ${isAdmin ? 'contenteditable="true"' : ''} data-field="rule">${item.rule}</span>
-                    ${isAdmin ? `<button class="btn-admin" style="background:var(--danger); margin-top:15px; width:100%; border:none;" onclick="deletePermanentHazardCard(${index})">Delete Card</button>` : ''}
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function addPermanentHazardCard() {
-            const title = prompt("Enter Hazard Title:");
-            const desc = prompt("Enter Description:");
-            const rule = prompt("Enter Safety Rule:");
-            if (title && desc && rule) {
-                const data = JSON.parse(localStorage.getItem(getRoomKey('permHazards'))) || defaultHazards;
-                data.push({ title, desc, rule });
-                localStorage.setItem(getRoomKey('permHazards'), JSON.stringify(data));
-                renderPermanentHazards();
-            }
-        }
-
-        function savePermanentHazards() {
-            const data = [];
-            document.querySelectorAll('#permanentHazardsContainer .card').forEach(card => {
-                data.push({
-                    title: card.querySelector('[data-field="title"]').innerText,
-                    desc: card.querySelector('[data-field="desc"]').innerText,
-                    rule: card.querySelector('[data-field="rule"]').innerText
-                });
-            });
-            localStorage.setItem(getRoomKey('permHazards'), JSON.stringify(data));
-            alert("Tutor rules saved locally!");
-        }
-
-        function deletePermanentHazardCard(index) {
-            const data = JSON.parse(localStorage.getItem(getRoomKey('permHazards'))) || defaultHazards;
-            data.splice(index, 1);
+            data.push({ title, desc, rule });
             localStorage.setItem(getRoomKey('permHazards'), JSON.stringify(data));
             renderPermanentHazards();
         }
+    }
 
-        function renderDocs() {
-            const sopList = document.getElementById('sopList');
-            const sdsList = document.getElementById('sdsList');
-            let docData = JSON.parse(localStorage.getItem(getRoomKey('shopDocs'))) || [];
-            
-            sopList.innerHTML = ''; sdsList.innerHTML = '';
-            if(docData.length === 0) {
-                sopList.innerHTML = '<p style="color:#6b7280; padding:10px;">No custom files added yet.</p>';
-                return;
-            }
-
-            docData.forEach((doc, index) => {
-                const li = document.createElement('li');
-                li.innerHTML = `<span>${doc.name}</span><div><a href="${doc.url}" target="_blank" class="doc-link">📄 View</a>${isAdmin ? `<button class="btn-admin" style="background:var(--danger); margin-left:10px; padding:2px 5px;" onclick="deleteDoc(${index})">❌</button>` : ''}</div>`;
-                if(doc.type === 'sop') sopList.appendChild(li);
-                else sdsList.appendChild(li);
+    function savePermanentHazards() {
+        const data = [];
+        document.querySelectorAll('#permanentHazardsContainer .card').forEach(card => {
+            data.push({
+                title: card.querySelector('[data-field="title"]').innerText,
+                desc: card.querySelector('[data-field="desc"]').innerText,
+                rule: card.querySelector('[data-field="rule"]').innerText
             });
-        }
+        });
+        localStorage.setItem(getRoomKey('permHazards'), JSON.stringify(data));
+        alert("Tutor rules saved locally!");
+    }
 
-        function addNewDoc() {
-            const type = prompt("Type ('sop' or 'sds'):").toLowerCase();
-            const name = prompt("Document Name:");
-            const url = prompt("Document Link URL:");
-            if(name && url && (type==='sop' || type==='sds')) {
-                const docData = JSON.parse(localStorage.getItem(getRoomKey('shopDocs'))) || [];
-                docData.push({type, name, url});
-                localStorage.setItem(getRoomKey('shopDocs'), JSON.stringify(docData));
-                renderDocs();
-            }
-        }
+    function deletePermanentHazardCard(index) {
+        const data = JSON.parse(localStorage.getItem(getRoomKey('permHazards'))) || defaultHazards;
+        data.splice(index, 1);
+        localStorage.setItem(getRoomKey('permHazards'), JSON.stringify(data));
+        renderPermanentHazards();
+    }
 
-        function deleteDoc(index) {
-            const docData = JSON.parse(localStorage.getItem(getRoomKey('shopDocs'))) || [];
-            docData.splice(index, 1);
+    function renderDocs() {
+        const sopList = document.getElementById('sopList');
+        const sdsList = document.getElementById('sdsList');
+        // Falls back straight onto the universal default hardcoded master list
+        let docData = JSON.parse(localStorage.getItem(getRoomKey('shopDocs'))) || defaultDocs;
+        
+        sopList.innerHTML = ''; sdsList.innerHTML = '';
+
+        docData.forEach((doc, index) => {
+            const isExternal = doc.url.startsWith('http://') || doc.url.startsWith('https://');
+            const targetUrl = isExternal ? doc.url : encodeURIComponent(doc.url);
+
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${doc.name}</span><div><a href="${targetUrl}" target="_blank" class="doc-link">📄 View</a>${isAdmin ? `<button class="btn-admin" style="background:var(--danger); margin-left:10px; padding:2px 5px;" onclick="deleteDoc(${index})">❌</button>` : ''}</div>`;
+            if(doc.type === 'sop') sopList.appendChild(li);
+            else sdsList.appendChild(li);
+        });
+    }
+
+    function addNewDoc() {
+        const type = prompt("Type ('sop' or 'sds'):").toLowerCase();
+        const name = prompt("Document Name:");
+        const url = prompt("Document Link URL:");
+        if(name && url && (type==='sop' || type==='sds')) {
+            const docData = JSON.parse(localStorage.getItem(getRoomKey('shopDocs'))) || defaultDocs;
+            docData.push({type, name, url});
             localStorage.setItem(getRoomKey('shopDocs'), JSON.stringify(docData));
             renderDocs();
         }
+    }
 
-        function renderAllViews() {
-            renderPermanentHazards();
-            renderGoogleIframes();
-            renderDocs();
-        }
+    function deleteDoc(index) {
+        const docData = JSON.parse(localStorage.getItem(getRoomKey('shopDocs'))) || defaultDocs;
+        docData.splice(index, 1);
+        localStorage.setItem(getRoomKey('shopDocs'), JSON.stringify(docData));
+        renderDocs();
+    }
 
-        document.getElementById('live-date').innerText = new Date().toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-        
-        // Initializer Execution
-        updateRoomUI();
-    </script>
+    function renderAllViews() {
+        renderPermanentHazards();
+        renderGoogleIframes();
+        renderDocs();
+    }
+
+    document.getElementById('live-date').innerText = new Date().toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    
+    // Initializer Execution
+    updateRoomUI();
+</script>
 </body>
 </html>

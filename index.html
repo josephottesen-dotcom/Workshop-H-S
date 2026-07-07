@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Workshop Safety Hub</title>
+    <title>Offline Workshop Safety Terminal & Register</title>
     <style>
         :root {
             --primary: #d97706;
@@ -15,12 +15,28 @@
             --admin-color: #2563eb;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: var(--light); color: var(--dark); display: flex; flex-direction: column; min-height: 100vh; }
-        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
         header {
-            background-color: var(--dark); color: white; padding: 1rem 2rem;
-            display: flex; justify-content: space-between; align-items: center;
+            background-color: var(--dark);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border-bottom: 5px solid var(--primary);
         }
 
@@ -31,118 +47,339 @@
             gap: 10px;
         }
 
+        .admin-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .btn-admin {
-            background: #374151; color: white; border: 1px solid #4b5563;
-            padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-weight: 600;
+            background: #374151;
+            color: white;
+            border: 1px solid #4b5563;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
         }
-        .btn-admin.logged-in { background: var(--admin-color); border-color: #1d4ed8; }
 
-        nav { background: white; display: flex; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-admin.logged-in {
+            background: var(--admin-color);
+            border-color: #1d4ed8;
+        }
+
+        nav {
+            background: white;
+            display: flex;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
         .nav-btn {
-            background: none; border: none; padding: 1rem 1.5rem; font-size: 1rem;
-            font-weight: 600; cursor: pointer; color: #4b5563; transition: all 0.2s;
-        }
-        .nav-btn:hover, .nav-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); background-color: #f9fafb; }
-
-        main { flex: 1; padding: 2rem; max-width: 1400px; width: 100%; margin: 0 auto; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        .card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 1.5rem; position: relative; }
-        h2 { margin-bottom: 1rem; color: var(--dark); border-left: 5px solid var(--primary); padding-left: 10px; }
-        
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
-        .grid-split { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-        
-        @media (max-width: 900px) {
-            .grid-split { grid-template-columns: 1fr; }
+            background: none;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #4b5563;
+            transition: all 0.2s;
         }
 
-        .hazard-card { border-top: 4px solid var(--danger); }
-        .admin-only { display: none !important; }
-        body.admin-mode .admin-only { display: inline-block !important; }
+        .nav-btn:hover, .nav-btn.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            background-color: #f9fafb;
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        h2 {
+            margin-bottom: 1rem;
+            color: var(--dark);
+            border-left: 5px solid var(--primary);
+            padding-left: 10px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .hazard-card {
+            border-top: 4px solid var(--danger);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        label {
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 100%;
+            background: #fff;
+        }
+
+        button.btn-submit {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button.btn-submit:hover {
+            background-color: var(--primary-dark);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background-color: #f9fafb;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        .badge.high { background: #fee2e2; color: #b91c1c; }
+        .badge.med { background: #fef3c7; color: #b45309; }
+        .badge.low { background: #dcfce7; color: #15803d; }
+
+        .doc-list {
+            list-style: none;
+        }
+        .doc-list li {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .doc-link {
+            color: var(--primary-dark);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Admin UI elements */
+        .admin-only {
+            display: none !important;
+        }
         
-        .iframe-container { position: relative; width: 100%; height: 600px; border: 1px solid #d1d5db; border-radius: 6px; overflow: hidden; }
-        .iframe-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-        
-        .doc-list { list-style: none; }
-        .doc-list li { padding: 0.75rem; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
-        .doc-link { color: var(--primary-dark); text-decoration: none; font-weight: 600; }
+        body.admin-mode .admin-only {
+            display: inline-block !important;
+        }
+
+        .btn-delete {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .editable-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--admin-color);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <div>
-            <h1>⚠️ <span id="hub-title">Workshop Safety Hub</span> <span id="admin-badge" style="display:none; color: #60a5fa; font-size: 1rem;">[ADMIN MODE]</span></h1>
+        <div class="logo-area">
+            <h1>🛠️ Workshop Safety Terminal <span id="admin-badge" style="display:none; color: #60a5fa; font-size: 1rem;">[ADMIN MODE]</span></h1>
         </div>
         <div class="admin-controls">
-            <span id="live-date" style="margin-right: 15px; font-size: 0.9rem;"></span>
-            <button id="adminBtn" class="btn-admin" onclick="openLoginModal()">Tutor Login</button>
+            <span id="live-date" style="margin-right: 15px; font-size: 0.9rem; font-weight: bold; color: #f3f4f6;"></span>
+            <button id="adminBtn" class="btn-admin" onclick="toggleAdmin()">Admin Login</button>
         </div>
     </header>
 
     <nav>
         <button class="nav-btn active" onclick="switchTab('rules')">Permanent Hazards & Rules</button>
-        <button class="nav-btn" onclick="switchTab('toolbox')">Daily Toolbox Meeting (Live Form)</button>
-        <button class="nav-btn" onclick="switchTab('docs')">SOPs & SDS Docs</button>
+        <button class="nav-btn" onclick="switchTab('toolbox')">Daily Workshop Register</button>
+        <button class="nav-btn" onclick="switchTab('docs')">SOPs & SDS Sheets</button>
     </nav>
 
     <main>
         <section id="rules" class="tab-content active">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
                 <div>
-                    <h2>Workshop Custom Hazards & Rules</h2>
-                    <p style="color: #6b7280;">Logged-in tutors can fully customize these rules for their specific class environment.</p>
+                    <h2>Fixed Workshop Hazards & Standard Controls</h2>
+                    <p style="color: #6b7280;">Review these rules prior to machine initialization. Admins can manage these cards directly.</p>
                 </div>
                 <div class="admin-only" style="display: flex; gap: 10px;">
-                    <button class="btn-admin" onclick="addPermanentHazardCard()" style="background: #16a34a;">➕ Add Card</button>
-                    <button class="btn-admin" onclick="savePermanentHazards()" style="background: var(--admin-color);">💾 Save Changes</button>
+                    <button class="btn-submit" onclick="addPermanentHazardCard()" style="background: #16a34a; padding: 0.5rem 1rem;">➕ Add New Card</button>
+                    <button class="btn-submit" onclick="savePermanentHazards()" style="background: var(--admin-color); padding: 0.5rem 1rem;">💾 Save Card Edits</button>
                 </div>
             </div>
+            
             <div class="grid-3" id="permanentHazardsContainer"></div>
         </section>
 
         <section id="toolbox" class="tab-content">
-            <h2>Live Daily Toolbox Form & Register</h2>
-            <p style="color: #6b7280; margin-bottom: 1.5rem;">Students log entries on the left; view real-time workspace updates across all devices on the right.</p>
-            
-            <div class="grid-split">
-                <div class="card">
-                    <h3>1. Report a Hazard</h3>
-                    <div class="iframe-container" id="formContainer">
-                        <p style="padding: 20px; color:#6b7280;">Please log in as a Tutor to link your custom Google Form embed URL here.</p>
+            <div class="grid-3" style="grid-template-columns: 1fr 2fr;">
+                
+                <div>
+                    <div class="card" style="border-top: 4px solid var(--success);">
+                        <h2>1. Daily Pre-Work Sign-Off</h2>
+                        <p style="color: #6b7280; font-size: 0.85rem; margin-bottom: 1rem;">Confirm you have completed visual checks of your workspace.</p>
+                        <form id="signoffForm" onsubmit="submitSignOff(event)">
+                            <div>
+                                <label for="signoffName">Full Student Name</label>
+                                <input type="text" id="signoffName" required placeholder="Type name for attendance...">
+                            </div>
+                            <button type="submit" class="btn-submit" style="background-color: var(--success);">Log Sign-Off Record</button>
+                        </form>
+                    </div>
+
+                    <div class="card" style="border-top: 4px solid var(--primary);">
+                        <h2>2. Report Active Floor Hazard</h2>
+                        <p style="color: #6b7280; font-size: 0.85rem; margin-bottom: 1rem;">Found a defect, broken tool, or oil slick right now? Put it in the log.</p>
+                        <form id="hazardForm" onsubmit="submitHazard(event)">
+                            <div>
+                                <label for="studentName">Logged By</label>
+                                <input type="text" id="studentName" required placeholder="Your Name">
+                            </div>
+                            <div>
+                                <label for="hazardLocation">Location/Machine Identifier</label>
+                                <input type="text" id="hazardLocation" required placeholder="e.g. Lathe 3, Welding Bay">
+                            </div>
+                            <div>
+                                <label for="hazardDesc">Fault / Safety Issue Observed</label>
+                                <textarea id="hazardDesc" rows="3" required placeholder="Describe issue..."></textarea>
+                            </div>
+                            <div>
+                                <label for="riskLevel">Immediate Risk Classification</label>
+                                <select id="riskLevel">
+                                    <option value="Low">Low (Requires Attention Later)</option>
+                                    <option value="Medium">Medium (Isolate/Fix before use)</option>
+                                    <option value="High">High (STOP WORK / Inform Tech Immediately)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-submit">File Dynamic Hazard Entry</button>
+                        </form>
                     </div>
                 </div>
-                <div class="card">
-                    <h3>2. Active Live Register</h3>
-                    <div class="iframe-container" id="sheetContainer">
-                        <p style="padding: 20px; color:#6b7280;">Please log in as a Tutor to link your live Google Sheets spreadsheet module view here.</p>
+
+                <div>
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h2>Active Dynamic Hazard Register</h2>
+                            <button class="btn-delete admin-only" onclick="clearAllHazards()">Clear Active Register</button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Logged Time</th>
+                                        <th>Name</th>
+                                        <th>Location</th>
+                                        <th>Issue Description</th>
+                                        <th>Risk</th>
+                                        <th class="admin-only">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="hazardLogBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h2>Pre-Work Toolbox Attendance Ledger</h2>
+                            <button class="btn-delete admin-only" onclick="clearAllSignoffs()">Reset Sign-Off List</button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Sign-Off Time</th>
+                                        <th>Student Name Verified</th>
+                                        <th class="admin-only">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="signoffLogBody"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="admin-only card" style="margin-top:20px; width:100%;">
-                <h3>⚙️ Tutor Settings: Setup Live Google Modules for <span class="current-tutor-name">Tutor</span></h3>
-                <p style="font-size:0.85rem; margin-bottom:10px; color:#4b5563;">Paste your dedicated Google Form "Embed HTML" link and your Google Sheet "Publish to Web" link below:</p>
-                <input type="text" id="adminFormUrl" placeholder="https://docs.google.com/forms/d/e/.../viewform?embedded=true" style="margin-bottom:10px;">
-                <input type="text" id="adminSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/.../pubhtml">
-                <button class="btn-admin" onclick="saveGoogleUrls()" style="background:var(--success); margin-top:10px; border:none; padding:10px 20px;">Link Live Modules</button>
+
             </div>
         </section>
 
         <section id="docs" class="tab-content">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h2>SOP & SDS Reference Library</h2>
-                <button class="btn-admin admin-only" onclick="addNewDoc()" style="background: var(--admin-color);">➕ Add Document</button>
+                <h2>Workshop Safety Library (Local Files)</h2>
+                <button class="btn-submit admin-only" onclick="addNewDoc()" style="background: var(--admin-color); padding: 0.5rem 1rem;">➕ Add Reference Link</button>
             </div>
-            <div class="grid-split">
+            <p style="color: #6b7280; margin-bottom: 1.5rem;">To link local assets, save files into the same folder as this tool and input their filenames below (e.g. <code>lathe_sop.pdf</code>).</p>
+            <div class="grid-3">
                 <div class="card">
-                    <h3>Standard Operating Procedures</h3>
+                    <h3>Standard Operating Procedures (SOP)</h3>
                     <ul class="doc-list" id="sopList"></ul>
                 </div>
                 <div class="card">
-                    <h3>Safety Data Sheets (SDS)</h3>
+                    <h3>Material Safety Data Sheets (SDS)</h3>
                     <ul class="doc-list" id="sdsList"></ul>
                 </div>
             </div>
@@ -150,232 +387,256 @@
     </main>
 
     <script>
-    // --- SECURE TUTOR LOGIC & SYSTEM NAMESPACE ---
-    let currentTutor = localStorage.getItem('active_tutor') || 'Joseph';
-    let isAdmin = localStorage.getItem('is_tutor_authenticated') === 'true';
+        // HARDWARE STORAGE DEFAULTS (FALLBACKS)
+        const defaultHazards = [
+            { title: "⚡ High Voltage Machinery", desc: "Automotive Hoists & Heavy Compressors.", rule: "Do not clear isolators or safety lockouts. Keep main panels clear." },
+            { title: "⚙️ Exposed Rotating Elements", desc: "Brake lathes, workshop grinders, and drills.", rule: "Strictly no gloves around spin zones. Safety eyewear mandatory." }
+        ];
 
-    function updateRoomUI() {
-        const formattedName = currentTutor.charAt(0).toUpperCase() + currentTutor.slice(1).toLowerCase();
-        document.getElementById('hub-title').innerText = `${formattedName}'s Safety Hub`;
-        document.querySelectorAll('.current-tutor-name').forEach(el => el.innerText = formattedName);
-        
-        if (isAdmin) {
-            document.body.classList.add('admin-mode');
-            document.getElementById('adminBtn').innerText = `Logout (${formattedName})`;
-            document.getElementById('adminBtn').classList.add('logged-in');
-            document.getElementById('admin-badge').style.display = "inline";
-        } else {
-            document.body.classList.remove('admin-mode');
-            document.getElementById('adminBtn').innerText = "Tutor Login";
-            document.getElementById('adminBtn').classList.remove('logged-in');
-            document.getElementById('admin-badge').style.display = "none";
+        const defaultDocs = [
+            { type: "sop", name: "Vehicle Hoist Operation SOP", url: "hoist_sop.pdf" },
+            { type: "sds", name: "Brake Cleaner Fluid Safety", url: "brake_sds.pdf" }
+        ];
+
+        let isAdmin = false;
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
         }
-        renderAllViews();
-    }
 
-    function getRoomKey(baseKey) {
-        return `${currentTutor.toLowerCase()}_${baseKey}`;
-    }
-
-    // --- AUTHENTICATION & LOGIN CHECKS ---
-    function openLoginModal() {
-        if (isAdmin) {
-            isAdmin = false;
-            localStorage.setItem('is_tutor_authenticated', 'false');
-            updateRoomUI();
-            return;
+        // Live Clock Setup
+        function updateClock() {
+            document.getElementById('live-date').innerText = new Date().toLocaleString('en-US', {
+                weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
         }
-        
-        const tutorInput = prompt("Enter Tutor Name (Joseph, Ronnel, Mike, Lucky, Nigel):");
-        if (!tutorInput || tutorInput.trim() === "") return;
-        
-        const standardizedInput = tutorInput.trim().toLowerCase();
-        
-        if (standardizedInput === 'joseph' || standardizedInput === 'ronnel' || standardizedInput === 'mike' || standardizedInput === 'lucky' || standardizedInput === 'nigel') {
-            const passInput = prompt(`Enter security password for ${tutorInput.trim()}:`);
-            if (passInput === "admin123") {
-                currentTutor = standardizedInput;
-                isAdmin = true;
-                localStorage.setItem('active_tutor', currentTutor);
-                localStorage.setItem('is_tutor_authenticated', 'true');
-                updateRoomUI();
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Admin Access Code
+        function toggleAdmin() {
+            if (!isAdmin) {
+                let password = prompt("Enter Terminal Override Password:");
+                if (password === "admin123") {
+                    isAdmin = true;
+                    document.body.classList.add('admin-mode');
+                    document.getElementById('adminBtn').innerText = "Exit Admin";
+                    document.getElementById('adminBtn').classList.add('logged-in');
+                    document.getElementById('admin-badge').style.display = "inline";
+                    refreshAllViews();
+                } else {
+                    alert("Access Denied.");
+                }
             } else {
-                alert("Incorrect system security password.");
+                isAdmin = false;
+                document.body.classList.remove('admin-mode');
+                document.getElementById('adminBtn').innerText = "Admin Login";
+                document.getElementById('adminBtn').classList.remove('logged-in');
+                document.getElementById('admin-badge').style.display = "none";
+                refreshAllViews();
             }
-        } else {
-            alert("Tutor name not recognized in configuration profile list.");
         }
-    }
 
-    // --- GOOGLE INTEGRATIONS HANDLER ---
-    function saveGoogleUrls() {
-        const formUrl = document.getElementById('adminFormUrl').value.trim();
-        const sheetUrl = document.getElementById('adminSheetUrl').value.trim();
-        
-        if(formUrl) localStorage.setItem(getRoomKey('googleForm'), formUrl);
-        if(sheetUrl) localStorage.setItem(getRoomKey('googleSheet'), sheetUrl);
-        
-        alert("Tutor cloud widgets linked successfully!");
-        renderGoogleIframes();
-    }
-
-    function renderGoogleIframes() {
-        const savedForm = localStorage.getItem(getRoomKey('googleForm'));
-        const savedSheet = localStorage.getItem(getRoomKey('googleSheet'));
-        
-        if (savedForm) {
-            document.getElementById('formContainer').innerHTML = `<iframe src="${savedForm}">Loading Form...</iframe>`;
-            document.getElementById('adminFormUrl').value = savedForm;
-        } else {
-            document.getElementById('formContainer').innerHTML = `<p style="padding:20px; color:#6b7280;">No custom Google Form linked yet. Log in to your tutor account to link it.</p>`;
+        function refreshAllViews() {
+            renderPermanentHazards();
+            renderDocs();
+            renderHazards();
+            renderSignoffs();
         }
-        
-        if (savedSheet) {
-            document.getElementById('sheetContainer').innerHTML = `<iframe src="${savedSheet}">Loading Live Matrix...</iframe>`;
-            document.getElementById('adminSheetUrl').value = savedSheet;
-        } else {
-            document.getElementById('sheetContainer').innerHTML = `<p style="padding:20px; color:#6b7280;">No target tracker spreadsheet connected yet.</p>`;
+
+        // 1. PERMANENT FAULTS STORAGE
+        function renderPermanentHazards() {
+            const container = document.getElementById('permanentHazardsContainer');
+            const data = JSON.parse(localStorage.getItem('permHazards')) || defaultHazards;
+            container.innerHTML = '';
+            
+            data.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "card hazard-card";
+                card.innerHTML = `
+                    ${isAdmin ? '<span class="editable-indicator">Modify Text Inline</span>' : ''}
+                    <h3 ${isAdmin ? 'contenteditable="true"' : ''} data-field="title">${item.title}</h3>
+                    <p style="margin: 0.5rem 0;" ${isAdmin ? 'contenteditable="true"' : ''} data-field="desc">${item.desc}</p>
+                    <strong>Mandatory Safe Rule:</strong> <span ${isAdmin ? 'contenteditable="true"' : ''} data-field="rule">${item.rule}</span>
+                    ${isAdmin ? `<button class="btn-delete" style="margin-top: 15px; width: 100%;" onclick="deletePermanentHazardCard(${index})">Remove This Rule Card</button>` : ''}
+                `;
+                container.appendChild(card);
+            });
         }
-    }
 
-    // --- INITIAL HARDCODED CONFIGS ---
-    const defaultHazards = [
-        { title: "⚠️ Custom Hazards Pending", desc: "This workspace configuration is currently blank.", rule: "Please log in as a Tutor to add permanent cards or delete placeholders." }
-    ];
+        function addPermanentHazardCard() {
+            const title = prompt("Card Header:");
+            const desc = prompt("What's the system hazard?:");
+            const rule = prompt("What rule controls it?:");
+            if (title && desc && rule) {
+                const data = JSON.parse(localStorage.getItem('permHazards')) || defaultHazards;
+                data.push({ title, desc, rule });
+                localStorage.setItem('permHazards', JSON.stringify(data));
+                renderPermanentHazards();
+            }
+        }
 
-    // HARDCODED CORE MASTER LIST FOR ALL TUTORS
-    const defaultDocs = [
-        { type: "sop", name: "Disc Brake Lathe SOP", url: "SOP Automotive_Disc Brake Lathe.pdf" },
-        { type: "sop", name: "Drill Press SOP", url: "SOP Automotive_Drill press.pdf" },
-        { type: "sop", name: "Jigsaw SOP", url: "SOP Automotive_JigSaw.pdf" },
-        { type: "sop", name: "Launch Hoist (Two Post) SOP", url: "SOP Automotive_Launch Hoist - two post.pdf" },
-        { type: "sop", name: "Parts Wash SOP", url: "SOP Automotive_Parts Wash.pdf" },
-        { type: "sop", name: "Tecalemit Hoist (Two Post) SOP", url: "SOP Automotive_Tecalemit hoist - two post.pdf" },
-        { type: "sop", name: "Wheel Balancer SOP", url: "SOP Automotive_Wheel Balancer.pdf" },
-        { type: "sop", name: "Stationary Engines SOP", url: "SOP Stationary Engines.pdf" },
-        { type: "sop", name: "Vehicles SOP", url: "SOP Vehicles.pdf" },
-        { type: "sop", name: "Angle Grinder SOP", url: "SOP Automotive_Angle Grinder.pdf" },
-        { type: "sop", name: "Battery Charger SOP", url: "SOP Automotive_Battery Charger.pdf" },
-        { type: "sop", name: "Hand Drill SOP", url: "SOP Automotive_Hand Drill.pdf" },
-        { type: "sop", name: "Heshbon Hoist (Two Post) SOP", url: "SOP Automotive_Heshbon Hoist - two post.pdf" },
-        { type: "sop", name: "Hot Water Cleaner SOP", url: "SOP Automotive_Hot Water Cleaner.pdf" },
-        { type: "sop", name: "Istobal Hoist (Four Post) SOP", url: "SOP Automotive_Istobal Hoist - four post.pdf" },
-        { type: "sop", name: "MIG Welder SOP", url: "SOP Automotive_MIG Welder.pdf" },
-        { type: "sop", name: "Oxy-Acetylene Welder SOP", url: "SOP Automotive_Oxy-Acetylene welder.pdf" },
-        { type: "sop", name: "Roller Brake Tester SOP", url: "SOP Automotive_Roller brake tester.pdf" },
-        { type: "sop", name: "Tyre Changer SOP", url: "SOP Automotive_Tyre Changer.pdf" },
-        { type: "sop", name: "Alternating Test Bench SOP", url: "SOP Automotive_Alternating Test Bench.pdf" },
-        { type: "sop", name: "Bench Grinder SOP", url: "SOP Automotive_Bench Grinder.pdf" },
-        { type: "sop", name: "Compressed Air SOP", url: "SOP Automotive_Compressed air.pdf" },
-        { type: "sds", name: "CRC NZ Brakleen SDS", url: "https://www.crc.co.nz/media/sds/crc_nz/sds-1010491.pdf" }
-    ];
-
-    // --- RE-RENDERING CORE LAYOUT SYSTEMS ---
-    function switchTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        event.currentTarget.classList.add('active');
-    }
-
-    function renderPermanentHazards() {
-        const container = document.getElementById('permanentHazardsContainer');
-        const data = JSON.parse(localStorage.getItem(getRoomKey('permHazards'))) || defaultHazards;
-        container.innerHTML = '';
-        
-        data.forEach((item, index) => {
-            const card = document.createElement('div');
-            card.className = "card hazard-card";
-            card.innerHTML = `
-                <h3 ${isAdmin ? 'contenteditable="true"' : ''} data-field="title">${item.title}</h3>
-                <p style="margin: 0.5rem 0;" ${isAdmin ? 'contenteditable="true"' : ''} data-field="desc">${item.desc}</p>
-                <strong>Rule:</strong> <span ${isAdmin ? 'contenteditable="true"' : ''} data-field="rule">${item.rule}</span>
-                ${isAdmin ? `<button class="btn-admin" style="background:var(--danger); margin-top:15px; width:100%; border:none;" onclick="deletePermanentHazardCard(${index})">Delete Card</button>` : ''}
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    function addPermanentHazardCard() {
-        const title = prompt("Enter Hazard Title:");
-        const desc = prompt("Enter Description:");
-        const rule = prompt("Enter Safety Rule:");
-        if (title && desc && rule) {
-            const data = JSON.parse(localStorage.getItem(getRoomKey('permHazards'))) || defaultHazards;
-            data.push({ title, desc, rule });
-            localStorage.setItem(getRoomKey('permHazards'), JSON.stringify(data));
+        function deletePermanentHazardCard(index) {
+            const data = JSON.parse(localStorage.getItem('permHazards')) || defaultHazards;
+            data.splice(index, 1);
+            localStorage.setItem('permHazards', JSON.stringify(data));
             renderPermanentHazards();
         }
-    }
 
-    function savePermanentHazards() {
-        const data = [];
-        document.querySelectorAll('#permanentHazardsContainer .card').forEach(card => {
-            data.push({
-                title: card.querySelector('[data-field="title"]').innerText,
-                desc: card.querySelector('[data-field="desc"]').innerText,
-                rule: card.querySelector('[data-field="rule"]').innerText
+        function savePermanentHazards() {
+            const data = [];
+            document.querySelectorAll('#permanentHazardsContainer .card').forEach(card => {
+                data.push({
+                    title: card.querySelector('[data-field="title"]').innerText,
+                    desc: card.querySelector('[data-field="desc"]').innerText,
+                    rule: card.querySelector('[data-field="rule"]').innerText
+                });
             });
-        });
-        localStorage.setItem(getRoomKey('permHazards'), JSON.stringify(data));
-        alert("Tutor rules saved locally!");
-    }
+            localStorage.setItem('permHazards', JSON.stringify(data));
+            alert("Local storage records successfully written to drive.");
+        }
 
-    function deletePermanentHazardCard(index) {
-        const data = JSON.parse(localStorage.getItem(getRoomKey('permHazards'))) || defaultHazards;
-        data.splice(index, 1);
-        localStorage.setItem(getRoomKey('permHazards'), JSON.stringify(data));
-        renderPermanentHazards();
-    }
+        // 2. DYNAMIC REGISTERS (LOCAL STORAGE DATA ARRAYS)
+        let activeHazards = JSON.parse(localStorage.getItem('terminalHazards')) || [];
+        let dailySignoffs = JSON.parse(localStorage.getItem('terminalSignoffs')) || [];
 
-    function renderDocs() {
-        const sopList = document.getElementById('sopList');
-        const sdsList = document.getElementById('sdsList');
-        // Falls back straight onto the universal default hardcoded master list
-        let docData = JSON.parse(localStorage.getItem(getRoomKey('shopDocs'))) || defaultDocs;
-        
-        sopList.innerHTML = ''; sdsList.innerHTML = '';
+        function renderHazards() {
+            const tbody = document.getElementById('hazardLogBody');
+            tbody.innerHTML = '';
+            activeHazards.forEach((h, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${h.time}</td>
+                    <td><strong>${h.user}</strong></td>
+                    <td>${h.loc}</td>
+                    <td>${h.desc}</td>
+                    <td><span class="badge ${h.risk.toLowerCase()}">${h.risk}</span></td>
+                    <td class="admin-only"><button class="btn-delete" onclick="deleteHazard(${index})">❌</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
 
-        docData.forEach((doc, index) => {
-            const isExternal = doc.url.startsWith('http://') || doc.url.startsWith('https://');
-            const targetUrl = isExternal ? doc.url : encodeURIComponent(doc.url);
+        function submitHazard(e) {
+            e.preventDefault();
+            const timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            activeHazards.unshift({
+                time: timeStr,
+                user: document.getElementById('studentName').value,
+                loc: document.getElementById('hazardLocation').value,
+                desc: document.getElementById('hazardDesc').value,
+                risk: document.getElementById('riskLevel').value
+            });
+            localStorage.setItem('terminalHazards', JSON.stringify(activeHazards));
+            renderHazards();
+            document.getElementById('hazardForm').reset();
+        }
 
-            const li = document.createElement('li');
-            li.innerHTML = `<span>${doc.name}</span><div><a href="${targetUrl}" target="_blank" class="doc-link">📄 View</a>${isAdmin ? `<button class="btn-admin" style="background:var(--danger); margin-left:10px; padding:2px 5px;" onclick="deleteDoc(${index})">❌</button>` : ''}</div>`;
-            if(doc.type === 'sop') sopList.appendChild(li);
-            else sdsList.appendChild(li);
-        });
-    }
+        function deleteHazard(index) {
+            activeHazards.splice(index, 1);
+            localStorage.setItem('terminalHazards', JSON.stringify(activeHazards));
+            renderHazards();
+        }
 
-    function addNewDoc() {
-        const type = prompt("Type ('sop' or 'sds'):").toLowerCase();
-        const name = prompt("Document Name:");
-        const url = prompt("Document Link URL:");
-        if(name && url && (type==='sop' || type==='sds')) {
-            const docData = JSON.parse(localStorage.getItem(getRoomKey('shopDocs'))) || defaultDocs;
-            docData.push({type, name, url});
-            localStorage.setItem(getRoomKey('shopDocs'), JSON.stringify(docData));
+        function clearAllHazards() {
+            if(confirm("Flush hazard tracking table?")) {
+                activeHazards = [];
+                localStorage.setItem('terminalHazards', JSON.stringify(activeHazards));
+                renderHazards();
+            }
+        }
+
+        // Attendance Ledger Controls
+        function renderSignoffs() {
+            const tbody = document.getElementById('signoffLogBody');
+            tbody.innerHTML = '';
+            dailySignoffs.forEach((s, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${s.time}</td>
+                    <td><strong>${s.name}</strong> <span style="color:#16a34a; font-size:0.8rem;">✓ Verified</span></td>
+                    <td class="admin-only"><button class="btn-delete" onclick="deleteSignoff(${index})">❌</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function submitSignOff(e) {
+            e.preventDefault();
+            const timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            dailySignoffs.unshift({
+                time: timeStr,
+                name: document.getElementById('signoffName').value
+            });
+            localStorage.setItem('terminalSignoffs', JSON.stringify(dailySignoffs));
+            renderSignoffs();
+            document.getElementById('signoffForm').reset();
+            alert("Sign-off confirmation logged! Stay safe out on the floor.");
+        }
+
+        function deleteSignoff(index) {
+            dailySignoffs.splice(index, 1);
+            localStorage.setItem('terminalSignoffs', JSON.stringify(dailySignoffs));
+            renderSignoffs();
+        }
+
+        function clearAllSignoffs() {
+            if(confirm("Purge attendance listing?")) {
+                dailySignoffs = [];
+                localStorage.setItem('terminalSignoffs', JSON.stringify(dailySignoffs));
+                renderSignoffs();
+            }
+        }
+
+        // 3. INTERNAL DOCUMENT MANAGEMENT
+        function renderDocs() {
+            const sopList = document.getElementById('sopList');
+            const sdsList = document.getElementById('sdsList');
+            const docData = JSON.parse(localStorage.getItem('terminalDocs')) || defaultDocs;
+            
+            sopList.innerHTML = '';
+            sdsList.innerHTML = '';
+
+            docData.forEach((doc, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${doc.name}</span>
+                    <div>
+                        <a href="${doc.url}" target="_blank" class="doc-link">📁 Launch Local Asset</a>
+                        <button class="btn-delete admin-only" style="margin-left:10px;" onclick="deleteDoc(${index})">❌</button>
+                    </div>
+                `;
+                if(doc.type === 'sop') sopList.appendChild(li);
+                else sdsList.appendChild(li);
+            });
+        }
+
+        function addNewDoc() {
+            const type = prompt("Enter file library division ('sop' or 'sds'):").toLowerCase();
+            if(type !== 'sop' && type !== 'sds') return alert("Invalid Type selection.");
+            const name = prompt("Enter Visible Display Label:");
+            const url = prompt("Enter Exact File Name (Ensure target file is located inside this same folder context):");
+            
+            if(name && url) {
+                const docData = JSON.parse(localStorage.getItem('terminalDocs')) || defaultDocs;
+                docData.push({type, name, url});
+                localStorage.setItem('terminalDocs', JSON.stringify(docData));
+                renderDocs();
+            }
+        }
+
+        function deleteDoc(index) {
+            const docData = JSON.parse(localStorage.getItem('terminalDocs')) || defaultDocs;
+            docData.splice(index, 1);
+            localStorage.setItem('terminalDocs', JSON.stringify(docData));
             renderDocs();
         }
-    }
 
-    function deleteDoc(index) {
-        const docData = JSON.parse(localStorage.getItem(getRoomKey('shopDocs'))) || defaultDocs;
-        docData.splice(index, 1);
-        localStorage.setItem(getRoomKey('shopDocs'), JSON.stringify(docData));
-        renderDocs();
-    }
-
-    function renderAllViews() {
-        renderPermanentHazards();
-        renderGoogleIframes();
-        renderDocs();
-    }
-
-    document.getElementById('live-date').innerText = new Date().toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-    
-    // Initializer Execution
-    updateRoomUI();
-</script>
+        // INITIAL SYSTEM BOOT
+        refreshAllViews();
+    </script>
 </body>
 </html>
